@@ -43,6 +43,12 @@ class QuotesSpider(scrapy.Spider):
 class LoginSpider(scrapy.Spider):
     name = 'sp'
     start_urls = ['https://edifichai.vw-finance.es/GestImpUI/Enter.aspx']
+    
+    txtUser = ''
+    txtPassword = ''
+    txtDependencia = ''
+    ComboTipoDep = ''
+
 
     def parse(self, response):
         return FormRequest.from_response(response,
