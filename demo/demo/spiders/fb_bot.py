@@ -7,8 +7,8 @@ class FbSpider(scrapy.Spider):
     name = 'fb'
     fb_login_url = 'https://facebook.com/login/'
     start_urls = [fb_login_url]
-    user_name = ''
-    password = ''
+    user_name = '' #ignoreline
+    password = '' #ignoreline
 
     def parse(self, response):
         if self.password == '':
