@@ -7,9 +7,9 @@ class MAL_spider(scrapy.Spider):
     name = 'weebo'
     mal_login_url = 'https://myanimelist.net/login.php'
     start_urls = [mal_login_url]
-    user_name = 'organicopium'
+    user_name = '#'
     #enter the password before executing
-    password = 'Password2018'
+    password = '#'
     token = None
 
     def parse(self, response):
