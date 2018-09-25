@@ -1,6 +1,7 @@
 *.pyc
 *.html
 *.json
+*.txt
 demo/temp
 back
 back/*

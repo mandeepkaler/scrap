@@ -8,6 +8,7 @@ import urllib
 
 
 
+
 lua_init = """ function main(splash)
   splash:init_cookies(splash.args.cookies)
   assert(splash:go{
@@ -37,7 +38,11 @@ script = """
             assert(splash:wait(10))
             local entries = splash:history()
 
-            assert(splash:runjs("$('a#dgInventario__ctl2_descargarBtn').click()"))
+            assert(splash:runjs("document.getElementById('dgInventario__ctl2_descargarBtn').click()"))
+
+            assert(splash:runjs("$('#dgInventario__ctl2_descargarBtn').html('changed from lua')"))
+
+            
 
             local last_response = entries[#entries].response
             return {
@@ -60,20 +65,26 @@ class LoginSpider(scrapy.Spider):
     ComboTipoDep = ''
     btnAceptar = ''
 
-
+ 
     formdata_d = {
-    'secuencia': 'MI6xOzV8xl8=',
-    '__EVENTTARGET' : 'dgInventario$_ctl2$descargarBtn',
-    '__EVENTARGUMENT': '', 
-    '__VIEWSTATE': '/wEPDwUKLTc5NDQ1OTM3NQ9kFgJmD2QWAgIBD2QWAgIHDzwrAAsBAA8WCB4IRGF0YUtleXMWAB4LXyFJdGVtQ291bnQCAR4JUGFnZUNvdW50AgEeFV8hRGF0YVNvdXJjZUl0ZW1Db3VudAIBZBYCZg9kFgZmDw8WBh4GSGVpZ2h0HB4MVGFibGVTZWN0aW9uCyopU3lzdGVtLldlYi5VSS5XZWJDb250cm9scy5UYWJsZVJvd1NlY3Rpb24AHgRfIVNCAoABZBYGZg8PFgIeBFRleHQFC0RlcGVuZGVuY2lhZGQCAQ8PFgIfBwUWw5psdGltYSBhY3R1YWxpemFjacOzbmRkAgIPDxYCHwcFBiZuYnNwO2RkAgEPDxYEHwQcHwYCgAFkFgZmDw8WAh8HBQUwODUwM2RkAgEPDxYCHwcFCjE5LTA5LTIwMThkZAICD2QWAgIBDw8WAh8HBQlEZXNjYXJnYXJkZAICDw8WBh8EHB8FCysEAh8GAoABZBYGZg8PFgIfBwUGJm5ic3A7ZGQCAQ8PFgIfBwUGJm5ic3A7ZGQCAg8PFgIfBwUGJm5ic3A7ZGRkUpvqAUB4AJx5kmsV5YSuMASlr5Y=',
-    '__VIEWSTATEGENERATOR': '0D382CE1',
-    '__EVENTVALIDATION': '/wEdAATxDjd00GL6KQuEpVAhcOoj3g2FJ7ZaNvfIUtTgRkXtqh5imCNaP+hAjiyMTgSvBl7kwrWzZDYu2EKijpnhebiDpeIo3ygkHMvRmR/UzOUegK1tjvk=',
-    'swctextbox1': ' '
+        'secuencia': 'FSLfzE4PnLk=',
+        '__EVENTTARGET' : 'dgInventario$_ctl2$descargarBtn',
+        '__EVENTARGUMENT': '', 
+        '__VIEWSTATE': '/wEPDwUKLTc5NDQ1OTM3NQ9kFgJmD2QWAgIBD2QWAgIHDzwrAAsBAA8WCB4IRGF0YUtleXMWAB4LXyFJdGVtQ291bnQCAR4JUGFnZUNvdW50AgEeFV8hRGF0YVNvdXJjZUl0ZW1Db3VudAIBZBYCZg9kFgZmDw8WBh4GSGVpZ2h0HB4MVGFibGVTZWN0aW9uCyopU3lzdGVtLldlYi5VSS5XZWJDb250cm9scy5UYWJsZVJvd1NlY3Rpb24AHgRfIVNCAoABZBYGZg8PFgIeBFRleHQFC0RlcGVuZGVuY2lhZGQCAQ8PFgIfBwUWw5psdGltYSBhY3R1YWxpemFjacOzbmRkAgIPDxYCHwcFBiZuYnNwO2RkAgEPDxYEHwQcHwYCgAFkFgZmDw8WAh8HBQUwODUwM2RkAgEPDxYCHwcFCjI0LTA5LTIwMThkZAICD2QWAgIBDw8WAh8HBQlEZXNjYXJnYXJkZAICDw8WBh8EHB8FCysEAh8GAoABZBYGZg8PFgIfBwUGJm5ic3A7ZGQCAQ8PFgIfBwUGJm5ic3A7ZGQCAg8PFgIfBwUGJm5ic3A7ZGRkQq7l0C+Y8mmYtoJtC09ke27V59w=',
+        '__VIEWSTATEGENERATOR': '0D382CE1',
+        '__EVENTVALIDATION': '/wEdAASZl3p/5O7wxNyC9P/LuDZw3g2FJ7ZaNvfIUtTgRkXtqh5imCNaP+hAjiyMTgSvBl7kwrWzZDYu2EKijpnhebiDIQ0FMv3CShlVATc7uImIABbEuNI=',
+        'swctextbox1': ' '
     }
 
     headers = {
-        'Accept-Encoding': 'gzip, deflate',
-        'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Referer': 'https://edifichai.vw-finance.es/GestImpUI/Cobros_mes/Cobros_Mes.aspx',
+            'Connection' : 'keep-alive',
+            'Host': 'edifichai.vw-finance.es',
+            'Origin': 'https://edifichai.vw-finance',
+            'Cookie' : ''
     }
     def start_requests(self):
         for url in self.start_urls:
@@ -111,14 +122,13 @@ class LoginSpider(scrapy.Spider):
     def scrap_iframe(self, response):
         if 'Errores' in response.body:
             self.log('login error')
+            return
         elif 'ifrMenu' in response.body:
             self.log('successfuly logged in')
                 
         with open('rawLogin.html', 'wb') as f:
             f.write("%s" % response.body)
-            self.log('Saved after login file %s' % 'rawLogin.html')
-        for key in response.data:
-            print('key {}'.format(key))
+            self.log('login response html saved at:  %s' % 'rawLogin.html')
 
         '''string_to_look_for = 'ifrMenu'
         filename = 'responseAfterLog.html'
@@ -136,11 +146,12 @@ class LoginSpider(scrapy.Spider):
             self.log('Saved after login file %s' % filename)
 
         selector = parsel.Selector(iframe)
-        '''
+        
         item = {
             'ifr_src': self.base_url + response.css('div#DIVMenu iframe#ifrMenu::attr(src)').extract_first()  
         }
         print('ifr_src {}'.format(item['ifr_src']))
+        '''
         url_if = self.base_url + '/GestImpUI/Cobros_mes/Cobros_Mes.aspx'
         js = self.getFileContentAsString()
         yield SplashRequest(
@@ -161,12 +172,42 @@ class LoginSpider(scrapy.Spider):
         )
 
     def download(self, response):
+        filename = 'cobros.html'
+        with open(filename, 'wb') as f:
+            f.write(response.body)
+
+        #self.headers['Cookie'] = response.cookiejar
+
+        print('cookie {}'.format(response.data['cookies']))
+
+        for cookie in response.data['cookies']:
+            #for i in cookie:
+            #    print('{}:{}'.format(i, cookie[i]))
+                self.headers['Cookie'] +=  str(cookie['name']) + "=" + str(cookie['value']) + ';'
+
+        print('cookies string {}'.format(self.headers['Cookie']))
+
+        cookies = response.data['cookies']
+
+       # for c in response.data['cookies']:
+        #    self.headers['Cookie'][c['name']] = c['value']
+
+        data = urllib.urlencode(self.formdata_d)
+        r = requests.post(self.base_url + '/GestImpUI/Cobros_mes/Cobros_Mes.aspx', data, allow_redirects=False, headers=self.headers)
+        with open('manual.csv', 'wb') as f:
+            f.write(r.content)
+
         yield SplashFormRequest.from_response(
                     response,
-                    formdata = self.formdata_d,
+                    formid =   'form1',
                     callback = self.extract_data,
                     endpoint = 'execute',
                     session_id = 'dummy',
+                    dont_click = True,
+                    clickdata = {
+                        'id' : 'dgInventario__ctl2_descargarBtn'
+                    },
+                    formdata = {},
                     args = 
                     {
                                 'html' : 1,
@@ -182,11 +223,7 @@ class LoginSpider(scrapy.Spider):
         filename = 'lala.html'
         with open(filename, 'wb') as f:
             f.write(response.body)
-            self.log('Saved file %s' % filename)
-        # check login succeed before going on
-        for key in response.data:
-            print('response data key: {}'.format(key))
-
+  
     def getFileContentAsString(self):
         with open('demo/spiders/script.js', 'r') as myfile:
             script = myfile.read().replace('\n', '')
