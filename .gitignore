@@ -3,6 +3,7 @@
 *.json
 *.txt
 *.csv
+*.png
 demo/temp
 back
 back/*
