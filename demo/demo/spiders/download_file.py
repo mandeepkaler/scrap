@@ -5,49 +5,9 @@ from scrapy_splash import SplashRequest
 from scrapy_splash import SplashFormRequest
 import requests
 import urllib
+from os.path import exists
+from os import makedirs
 
-
-
-
-lua_init = """ function main(splash)
-  splash:init_cookies(splash.args.cookies)
-  assert(splash:go{
-    splash.args.url,
-    headers=splash.args.headers,
-    http_method=splash.args.http_method,
-    body=splash.args.body,
-    })
-  assert(splash:wait(0.5))
-
-  local entries = splash:history()
-  local last_response = entries[#entries].response
-  return {
-    url = splash:url(),
-    headers = last_response.headers,
-    http_status = last_response.status,
-    cookies = splash:get_cookies(),
-    html = splash:html(),
-  }
-end
-"""
-script = """
-        function main(splash)
-            splash:init_cookies(splash.args.cookies)
-            assert(splash:go(splash.args.url))
-            splash:set_viewport_full()
-            assert(splash:wait(10))
-            local entries = splash:history()
-            assert(splash:runjs("$('#dgInventario__ctl2_descargarBtn').html('changed from lua')"))
-            local last_response = entries[#entries].response
-            return {
-                url = splash:url(),
-                headers = last_response.headers,
-                http_status = last_response.status,
-                cookies = splash:get_cookies(),
-                html = splash:html(),
-            }
-            end
-"""
 class LoginSpider(scrapy.Spider):
     name = 'edifichai_spalsh'
     
@@ -59,7 +19,8 @@ class LoginSpider(scrapy.Spider):
     txtDependencia = ''
     ComboTipoDep = ''
     btnAceptar = ''
-
+    response_dir = 'response/'
+    lua_dir = 'lua/'
  
     formdata = {
         'secuencia': 'FSLfzE4PnLk=',
@@ -70,7 +31,6 @@ class LoginSpider(scrapy.Spider):
         '__EVENTVALIDATION': '/wEdAASZl3p/5O7wxNyC9P/LuDZw3g2FJ7ZaNvfIUtTgRkXtqh5imCNaP+hAjiyMTgSvBl7kwrWzZDYu2EKijpnhebiDIQ0FMv3CShlVATc7uImIABbEuNI=',
         'swctextbox1': ' '
     }
-
     headers = {
             'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -85,6 +45,7 @@ class LoginSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield SplashRequest(url)
+            
     #check wether the credentials have been set
     def credentials(self):
         if self.txtPassword == '' or self.txtDependencia == '' or self.txtUser == '' or self.ComboTipoDep == '' or self.btnAceptar == '' :
@@ -106,28 +67,27 @@ class LoginSpider(scrapy.Spider):
                     'ComboTipoDep' : self.ComboTipoDep,
                     'btnAceptar'    :   self.btnAceptar
                 },
-                callback = self.scrap_iframe,
+                callback = self.parse_login,
                 endpoint = 'execute',
                 cache_args = ['lua_source'],
                 session_id = 'dummy',
                 args = 
                 {
                             'html' : 1,
-                            'lua_source' : lua_init,
+                            'lua_source' : self.getFileContentAsString(self.lua_dir + 'init.lua'),
                             'wait' : 5
                 })
 
     #process the response through splash
-    def scrap_iframe(self, response):
-        if 'Errores' in response.body:
-            self.log('login failed!')
-            return
-        elif 'ifrMenu' in response.body:
+    def parse_login(self, response):
+        if 'ifrMenu' in response.body:
             self.log('logged in successfuly!')
-                
-        with open('after_login.html', 'wb') as f:
-            f.write("%s" % response.body)
-            self.log('response html after login, saved as :  %s' % 'after_login.html')
+        else:
+            self.log('login failed')
+            return
+
+        #save the html response as a file
+        self.save_response('after_login.html', response.body)    
         
         yield SplashRequest(
             url = self.download_url,
@@ -136,7 +96,7 @@ class LoginSpider(scrapy.Spider):
             cache_args = ['lua_source'],
             args={
                 'html' : 1,
-                'lua_source' : script,
+                'lua_source' : self.getFileContentAsString(self.lua_dir + 'maintain_session.lua'),
                 'wait': 5
                 },
             session_id = 'dummy',
@@ -145,9 +105,8 @@ class LoginSpider(scrapy.Spider):
         )
 
     def download(self, response):
-        filename = 'cobros.html'
-        with open(filename, 'wb') as f:
-            f.write(response.body)
+        self.save_response('download_page.html', response.body)
+        self.log('download page saved as : {}'.format(self.response_dir + 'download_page.html'))
         #extract the cookies that are neccesary to maintain the session
         for cookie in response.data['cookies']:
                 self.headers['Cookie'] +=  str(cookie['name']) + "=" + str(cookie['value']) + ';'
@@ -155,12 +114,23 @@ class LoginSpider(scrapy.Spider):
         self.log('cookies: {}'.format(self.headers['Cookie']))
 
         formdata = urllib.urlencode(self.formdata)
-        response = requests.post(self.base_url + '/GestImpUI/Cobros_mes/Cobros_Mes.aspx', formdata, allow_redirects=False, headers=self.headers)
+        res = requests.post(self.download_url, formdata, allow_redirects=False, headers=self.headers)
 
-        with open('result.csv', 'wb') as f:
-            f.write(response.content)
+        if res.status_code == 200:
+            filename = res.headers['Content-Disposition'].split('=')[1]
+            if 'csv' not in filename:
+                filename = "response.html"
+            self.save_response(filename, res.content)
+            self.log('downloaded file saved as: {}'.format(self.response_dir + filename))
 
-    def getFileContentAsString(self):
-        with open('demo/spiders/script.js', 'r') as myfile:
-            script = myfile.read().replace('\n', '')
-        return script
+    def getFileContentAsString(self, filepath):
+        with open(filepath, 'r') as myfile:
+            string = myfile.read().replace('\n', '')
+        return string
+
+    def save_response(self, filename, content):
+        if not exists(self.response_dir):
+            makedirs(self.response_dir)
+        with open(self.response_dir + filename, 'wb') as f:
+            f.write("%s" % content)
+            self.log('response saved as :{}'.format(self.response_dir + filename))
