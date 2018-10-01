@@ -6,7 +6,7 @@ function main(splash)
         http_method=splash.args.http_method,
         body=splash.args.body,
         })
-    assert(splash:wait(0.5))
+    assert(splash:wait(3))
 
     local entries = splash:history()
     local last_response = entries[#entries].response

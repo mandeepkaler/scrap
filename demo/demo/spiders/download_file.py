@@ -40,11 +40,6 @@ class LoginSpider(scrapy.Spider):
         'Origin': 'https://edifichai.vw-finance',
         'Cookie': ''
     }
-    txtUser = 'SA08503'  # gitignore
-    txtPassword = 'acu0918'  # gitignore
-    txtDependencia = '08503'  # gitignore
-    ComboTipoDep = '3'  # gitignore
-    btnAceptar = 'Aceptar'  # gitignore
 
     #txtPassword = getPasswordFromDb()
 

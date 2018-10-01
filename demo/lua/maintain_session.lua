@@ -2,7 +2,7 @@ function main(splash)
     splash:init_cookies(splash.args.cookies)
     assert(splash:go(splash.args.url))
     splash:set_viewport_full()
-    assert(splash:wait(10))
+    assert(splash:wait(7))
     local entries = splash:history()
 
     

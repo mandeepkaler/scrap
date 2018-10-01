@@ -13,7 +13,7 @@ def getPasswordFromDb():
 
     cursor = connection.cursor()
     
-    #WHERE clause to add
+    #TODO where clause
     cursor.execute('SELECT {0} FROM {1}'.format(coloumn, table))
 
     password = cursor.fetchone()
